@@ -75,8 +75,6 @@ def handle_image(event):
 
     # 画像を削除する
     src_image_path.unlink()
-    Path(main_image_path).unlink()
-    Path(preview_image_path).unlink()
 
 
 def public_attr(obj) -> List[str]:
