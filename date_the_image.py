@@ -1,5 +1,7 @@
 from datetime import datetime
+from loguru import logger
 from pathlib import Path
+
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -16,14 +18,16 @@ def date_the_image(src: str, desc: str, size=800) -> None:
     """
     # 開く
     im = Image.open(src)
+    logger.debug(im)
 
     # 800 x Height の比率にする
     proportion = size / im.width
     im_resized = im.resize((int(im.width * proportion), int(im.height * proportion)))
 
     draw = ImageDraw.Draw(im_resized)
+    logger.debug(draw)
 
-    font = ImageFont.truetype("./fonts/Harlow Solid Regular.ttf", 60)
+    font = ImageFont.truetype(Path("/fonts/Harlow Solid Regular.ttf").absolute(), 60)
     text = datetime.now().strftime("%Y/%m/%d")
 
     # 図形を描画
@@ -40,4 +44,3 @@ def date_the_image(src: str, desc: str, size=800) -> None:
 
     # 保存
     im.save(desc)
-
