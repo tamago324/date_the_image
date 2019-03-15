@@ -17,10 +17,11 @@ def date_the_image(src: str, desc: str, size=800) -> None:
     im = Image.open(src)
 
     # 800 x Height の比率にする
-    proportion = size / im.width
-    im_resized = im.resize((int(im.width * proportion), int(im.height * proportion)))
+    if im.width > size:
+        proportion = size / im.width
+        im = im.resize((int(im.width * proportion), int(im.height * proportion)))
 
-    draw = ImageDraw.Draw(im_resized)
+    draw = ImageDraw.Draw(im)
 
     font = ImageFont.truetype("./fonts/Harlow Solid Regular.ttf", 60)
     text = datetime.now().strftime("%Y/%m/%d")
@@ -38,4 +39,4 @@ def date_the_image(src: str, desc: str, size=800) -> None:
     draw.text((x, y), text, fill=(0, 0, 0), font=font)
 
     # 保存
-    im_resized.save(desc)
+    im.save(desc)
