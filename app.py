@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from pathlib import Path
 from typing import List
 
 from flask import Flask, abort, request
@@ -14,6 +14,10 @@ app = Flask(__name__)
 
 line_bot_api = LineBotApi(os.environ["CHANNEL_ACCESS_TOKEN"])
 handler = WebhookHandler(os.environ["CAHNNEL_SECRET"])
+
+SRC_IMAGE_PATH = "static/images/{}.jpg"
+MAIN_IMAGE_PATH = "static/images/{}_main.jpg"
+PREVIEW_IMAGE_PATH = "static/images/{}_preview.jpg"
 
 
 @app.route("/")
@@ -48,19 +52,25 @@ def handle_message(event):
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     message_id = event.message.id
+
+    src_image_path = Path(SRC_IMAGE_PATH.format(message_id)).absolute()
+    main_image_path = MAIN_IMAGE_PATH.format(message_id)
+    preview_image_path = PREVIEW_IMAGE_PATH.format(message_id)
+
     # 画像を保存
-    save_image(message_id)
+    save_image(message_id, src_image_path)
 
     # 画像の加工、保存
-    image_path_main = date_the_image.date_the_image_main(message_id)
-    image_path_preview = date_the_image.date_the_image_preview(message_id)
+    date_the_image(src=src_image_path, desc=Path(main_image_path).absolute())
+    date_the_image(src=src_image_path, desc=Path(preview_image_path).absolute())
 
     # 画像の送信
     image_message = ImageSendMessage(
-        original_content_url=f"https://date-the-image.herokuapp.com/{image_path_main}",
-        preview_image_url=f"https://date-the-image.herokuapp.com/{image_path_preview}",
+        original_content_url=f"https://date-the-image.herokuapp.com/{main_image_path}",
+        preview_image_url=f"https://date-the-image.herokuapp.com/{preview_image_path}",
     )
 
+    app.logger.info(f"https://date-the-image.herokuapp.com/{main_image_path}")
     line_bot_api.reply_message(event.reply_token, image_message)
 
 
@@ -68,9 +78,10 @@ def public_attr(obj) -> List[str]:
     return [x for x in obj.__dir__() if not x.startswith("_")]
 
 
-def save_image(message_id: str) -> None:
+def save_image(message_id: str, save_path: str) -> None:
+    """保存"""
     message_content = line_bot_api.get_message_content(message_id)
-    with open(f"pictures/{message_id}.jpeg", "wb") as f:
+    with open(save_path, "wb") as f:
         for chunk in message_content.iter_content():
             f.write(chunk)
 
