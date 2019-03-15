@@ -73,6 +73,11 @@ def handle_image(event):
     app.logger.info(f"https://date-the-image.herokuapp.com/{main_image_path}")
     line_bot_api.reply_message(event.reply_token, image_message)
 
+    # 画像を削除する
+    src_image_path.unlink()
+    Path(main_image_path).unlink()
+    Path(preview_image_path).unlink()
+
 
 def public_attr(obj) -> List[str]:
     return [x for x in obj.__dir__() if not x.startswith("_")]
